@@ -15,4 +15,4 @@ MonoBehaviour:
   cardId: 2
   cardName: Cherry
   cardState: 0
-  cardImage: {fileID: 0}
+  cardImage: {fileID: -1312704022, guid: cfa4574dc44ea4679a734ef360f56306, type: 3}

@@ -15,4 +15,4 @@ MonoBehaviour:
   cardId: 0
   cardName: Apple
   cardState: 0
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 1343744949, guid: cfa4574dc44ea4679a734ef360f56306, type: 3}

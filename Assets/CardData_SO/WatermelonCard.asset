@@ -15,4 +15,4 @@ MonoBehaviour:
   cardId: 4
   cardName: Watermelon
   cardState: 0
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 487923006, guid: cfa4574dc44ea4679a734ef360f56306, type: 3}

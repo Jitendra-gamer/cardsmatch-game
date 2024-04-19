@@ -1,0 +1,22 @@
+﻿<Properties StartupConfiguration="{05912CA8-6C77-AF35-0E82-1B1739123630}|">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/UI/GamePlayUIController.cs">
+    <Files>
+      <File FileName="Assets/Scripts/UI/MainMenuUI.cs" />
+      <File FileName="Assets/Scripts/Cards/ICard.cs" />
+      <File FileName="Assets/Scripts/Controllers/GameController.cs" />
+      <File FileName="Assets/Scripts/EventManager/Events.cs" />
+      <File FileName="Assets/Scripts/EventManager/EventManager.cs" />
+      <File FileName="Assets/Scripts/UI/CardsGridController.cs" Line="60" Column="13" />
+      <File FileName="Assets/Scripts/ObjectPooling/ObjectPool.cs" />
+      <File FileName="Assets/Scripts/UI/GamePlayUIController.cs" Line="23" Column="28" />
+      <File FileName="Assets/Scripts/Extension/ListExtension.cs" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="b908035c-7cd0-4872-9b81-1cda8039545f" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>
