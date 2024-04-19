@@ -64,12 +64,32 @@ namespace CardMatch.UI
         {
             List<CardType> cardsPair = new List<CardType>();
 
+            // load game from saved data if saved
+            if (PlayerPrefs.HasKey(GameSaver.GameDataKey))
+            {
+                CardData[] cardDatas = GameUtility.GetSavedCards();
+
+                for (int i = 0; i < cardDatas.Length; i++)
+                {
+                    Debug.Log(cardDatas[i].cardId);
+                    CardType cardType = cardTypes[cardDatas[i].cardId];
+
+                    cardType.cardState = cardDatas[i].cardState;
+
+                    Debug.Log(cardType.cardId);
+                    cardsPair.Add(cardType);
+                }
+
+                return cardsPair;
+            }
+
             for (int i = 0; i < noOfCards; i++)
             {
                 int randomCardIndex = Random.Range(0, cardTypes.Length);
 
                 CardType cardType = cardTypes[randomCardIndex]; // get randam card from CardTypes array (All cards)
 
+                cardType.cardState = CardState.UnFlipped;
                 cardsPair.Add(cardType);
                 cardsPair.Add(cardType);
             }
@@ -97,12 +117,13 @@ namespace CardMatch.UI
             // To spawn cards, replace your original code with this:
             for (int i = 0; i < cardsPair.Count; i++)
             {
-                Debug.Log(cardsPair[i].cardState);
                 Card card = objectPool.GetObject();
                 card.Initialize(cardsPair[i]);
                 Debug.Log(card.cardState);
                 cards[i] = card;
             }
+
+            GameObject.FindObjectOfType<GameController>().SetCards(cards);
         }
     }
 }

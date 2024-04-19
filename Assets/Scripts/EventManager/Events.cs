@@ -16,5 +16,8 @@ namespace CardMatch
         public const string TurnsUpdateUI = "TurnsUpdateUI";
         public const string GameWin = "GameWin";
         public const string RestartGame = "RestartGame";
+
+        //Save game
+        public const string SaveGameProgress = "public const string";
     }
 }

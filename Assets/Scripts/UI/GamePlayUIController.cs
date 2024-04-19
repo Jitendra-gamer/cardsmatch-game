@@ -6,34 +6,39 @@ namespace CardMatch.UI
 {
     public class GamePlayUIController : MonoBehaviour
     {
-        [SerializeField] private Button homeButton;
-        [SerializeField] private Button saveButton;
+        [SerializeField] private Button homeButton, saveButton;
         [SerializeField] private GameObject playAgianButton;
-        [SerializeField] private TMP_Text scoreText;
-        [SerializeField] private TMP_Text matchesText;
-        [SerializeField] private TMP_Text turnText;
+        [SerializeField] private TMP_Text scoreText,matchesText, turnText;
 
-        private void Start()
+        private void Awake()
         {
             EventManager<int>.AddListener(Events.ScoreUpdateUI, ScoreUpdate);
+            EventManager<int>.AddListener(Events.MatchSuccessfull, MatchesUpdate);
+            EventManager<int>.AddListener(Events.TurnsUpdateUI, TurnsUpdate);
             EventManager.AddListener(Events.GameWin, GameOver);
 
-            homeButton.onClick.AddListener(SaveGameProgress);
+            homeButton.onClick.AddListener(HomeScene);
             saveButton.onClick.AddListener(SaveGameProgress);
             playAgianButton.SetActive(false);
+            playAgianButton.GetComponent<Button>().onClick.AddListener(OnPlayAgain);
         }
 
         private void OnDestroy()
         {
             EventManager<int>.RemoveListener(Events.ScoreUpdateUI, ScoreUpdate);
+            EventManager<int>.RemoveListener(Events.MatchSuccessfull, MatchesUpdate);
+            EventManager<int>.RemoveListener(Events.TurnsUpdateUI, TurnsUpdate);
             EventManager.RemoveListener(Events.GameWin, GameOver);
 
-            homeButton.onClick.RemoveListener(SaveGameProgress);
+            homeButton.onClick.RemoveListener(HomeScene);
+            saveButton.onClick.RemoveListener(SaveGameProgress);
+            playAgianButton.GetComponent<Button>().onClick.RemoveListener(OnPlayAgain);
         }
 
         private void ScoreUpdate(int score)
         {
-            turnText.text = score.ToString();
+            Debug.Log("Score: " + score);
+            scoreText.text = score.ToString();
         }
 
         private void MatchesUpdate(int matches)
@@ -49,19 +54,20 @@ namespace CardMatch.UI
         private void GameOver()
         {
             Debug.Log("GameOver");
+            saveButton.gameObject.SetActive(false);
             playAgianButton.SetActive(true);
         }
 
-        private void RestartGame()
+        private void HomeScene()
         {
-            playAgianButton.SetActive(false);
-            MatchesUpdate(0);
-            ScoreUpdate(0);
+            PlayerPrefs.DeleteKey(GameSaver.GameDataKey);
+            PlayerPrefs.Save();
+            SceneLoadManager.LoadMainMenu();
         }
 
         private void SaveGameProgress()
         {
-            //todo
+            EventManager.Dispatch(Events.SaveGameProgress);
         }
 
         public void OnPlayAgain()
@@ -69,6 +75,15 @@ namespace CardMatch.UI
             Debug.Log("OnPlayAgain");
             RestartGame();
             EventManager.Dispatch(Events.RestartGame);
+        }
+
+        private void RestartGame()
+        {
+            saveButton.gameObject.SetActive(true);
+            playAgianButton.SetActive(false);
+            MatchesUpdate(0);
+            ScoreUpdate(0);
+            TurnsUpdate(0);
         }
     }
 }

@@ -11,16 +11,22 @@ namespace CardMatch
             matchSucessClip,
             gameOverClip;
 
+        private Card[] cards;
         private readonly List<ICard> flippedCards = new List<ICard>();
 
         private const int NumberOfCardToMatch = 2;
         private int currentMatchCount = 0;
+        private int turnsTaken = 0;
         private int requiredMatchesToWin;
 
         private void Start()
         {
             requiredMatchesToWin = GetRequiredMatchToWin();
+            CheckForSavedGameProgressData();
+            Debug.Log("RequiredMatchToWin:" + requiredMatchesToWin);
             EventManager<Card>.AddListener(Events.CardClicked, CardClicked);
+
+            EventManager.AddListener(Events.SaveGameProgress, SaveGame);
             EventManager.AddListener(Events.RestartGame, RestartGame);
         }
 
@@ -41,12 +47,34 @@ namespace CardMatch
         }
 
         /// <summary>
+        /// Get user selected Grid data
+        /// Calculate requiredMatchesToWin
+        /// </summary>
+        private void CheckForSavedGameProgressData()
+        {
+            if (PlayerPrefs.HasKey(GameSaver.GameDataKey))
+            {
+                SaveGameData saveGameData = GameUtility.GetSavedGameProgressData();
+                if (saveGameData != null)
+                {
+                    turnsTaken = saveGameData.turnsTaken;
+                    currentMatchCount = saveGameData.matches;
+
+                    EventManager<int>.Dispatch(Events.MatchSuccessfull, currentMatchCount);
+                    EventManager<int>.Dispatch(Events.TurnsUpdateUI, turnsTaken);
+                }
+            }
+        }
+
+        /// <summary>
         /// Game Logic on card click
         /// add clicked card to temp list and check both card has same id for matches
         /// </summary>
         /// <param name="card"></param>
         private void CardClicked(ICard card)
         {
+            turnsTaken++;
+            EventManager<int>.Dispatch(Events.TurnsUpdateUI, turnsTaken);
             if (!card.IsFlipped() && flippedCards.Count < NumberOfCardToMatch)
             {
                 card.Flip();
@@ -86,7 +114,7 @@ namespace CardMatch
             if (allCardsHaveSameId)
             {
                 currentMatchCount++;
-                EventManager.Dispatch(Events.MatchSuccessfull);
+                EventManager<int>.Dispatch(Events.MatchSuccessfull, currentMatchCount);
                 AudioController.GetInstance().PlayOneShot(matchSucessClip);
 
                 CheckGameWin();
@@ -119,6 +147,22 @@ namespace CardMatch
         private void RestartGame()
         {
             currentMatchCount = 0;
+            turnsTaken = 0;
+            PlayerPrefs.DeleteKey(GameSaver.GameDataKey);
+            PlayerPrefs.Save();
+        }
+
+        public void SetCards(Card[] cards)
+        {
+            this.cards = cards;
+            Debug.Log(this.cards.Length);
+        }
+
+        private void SaveGame()
+        {
+            GameSaver gameSaver = new GameSaver();
+            int score = FindAnyObjectByType<ScoreController>().score;
+            gameSaver.SaveCardData(cards, score, currentMatchCount, turnsTaken);
         }
     }
 }

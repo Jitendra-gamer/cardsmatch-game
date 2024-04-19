@@ -55,7 +55,16 @@ namespace CardMatch
             cardState = pair.cardState;
             Debug.Log("Initialize" + cardState);
 
-            Flip();
+            if (cardState == CardState.Matched)
+            {
+                cardImage.enabled = false;
+                GetComponent<Image>().enabled = false;
+            }
+            else
+            {
+                GetComponent<Image>().enabled = true;
+                Flip();
+            }
         }
 
         /// <summary>

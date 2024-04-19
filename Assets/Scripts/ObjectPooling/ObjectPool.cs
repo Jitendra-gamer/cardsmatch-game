@@ -34,13 +34,13 @@ namespace CardMatch
         }
 
         /// <summary>
-        /// Find and return an inactive bullet from the pool
-        /// If no inactive bullet is found, create a new one and add it to the pool
+        /// Find and return an inactive card from the pool
+        /// If no inactive card is found, create a new one and add it to the pool
         /// </summary>
         /// <returns></returns>
         public Card GetObject()
         {
-            // Find and return an inactive bullet from the pool
+            // Find and return an inactive card from the pool
             foreach (GameObject card in cardPool)
             {
                 if (!card.activeInHierarchy)
@@ -50,7 +50,7 @@ namespace CardMatch
                 }
             }
 
-            // If no inactive bullet is found, create a new one and add it to the pool
+            // If no inactive cards is found, create a new one and add it to the pool
             GameObject newCard = Instantiate(cardPrefab, cardContainer);
             cardPool.Add(newCard);
             return newCard.GetComponent<Card>();
