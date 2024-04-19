@@ -62,13 +62,19 @@
     <Compile Include="Assets/Scripts/Singleton/Singleton.cs" />
     <Compile Include="Assets/Scripts/Cards/Card.cs" />
     <Compile Include="Assets/Scripts/EventManager/Events.cs" />
-    <Compile Include="Assets/Scripts/Controllers/SceneLoadManager.cs" />
+    <Compile Include="Assets/Scripts/Utils/SceneLoadManager.cs" />
     <Compile Include="Assets/Scripts/Cards/CardState.cs" />
     <Compile Include="Assets/Scripts/Cards/ICard.cs" />
     <Compile Include="Assets/Scripts/Controllers/GameStats.cs" />
     <Compile Include="Assets/Scripts/UI/MainMenuUI.cs" />
     <Compile Include="Assets/Scripts/EventManager/EventManager.cs" />
     <Compile Include="Assets/Scripts/Controllers/AudioController.cs" />
+    <Compile Include="Assets/Scripts/Controllers/GameController.cs" />
+    <Compile Include="Assets/Scripts/Utils/GameUtility.cs" />
+    <Compile Include="Assets/Scripts/UI/GamePlayUIController.cs" />
+    <Compile Include="Assets/Scripts/UI/CardsGridController.cs" />
+    <Compile Include="Assets/Scripts/ObjectPooling/ObjectPool.cs" />
+    <Compile Include="Assets/Scripts/Extension/ListExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
