@@ -1,13 +1,12 @@
-
 namespace CardMatch
 {
     public class Events
     {
         //CardClick
         public const string CardClicked = "CardClicked";
-
+    
         //Score
-        public const string MatchSuccessfull = "MatchSuccessfull";
+        public const string MatchSuccessful = "MatchSuccessful";
         public const string MatchFailed = "MatchFailed";
 
         //UI
@@ -19,5 +18,8 @@ namespace CardMatch
 
         //Save game
         public const string SaveGameProgress = "public const string";
+
+        //Audios
+        public const string CardClickAudio = "CardClickAudio";
     }
 }

@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace CardMatch
 {
     [Serializable]
     public class SaveGameData
     {
-        public GameStats.LayoutType stats;
+        public LayoutType stats;
         public CardData[] cardDatas;
         public int scores;
         public int turnsTaken;

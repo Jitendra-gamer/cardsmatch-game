@@ -1,32 +1,24 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using CardMatch.UI;
+using UnityEngine.Assertions.Must;
 
 namespace CardMatch
 {
     public class GameController : MonoBehaviour
     {
-        [SerializeField]
-        private AudioClip matchFailedClip,
-            matchSucessClip,
-            gameOverClip;
-
-        private Card[] cards;
         private readonly List<ICard> flippedCards = new List<ICard>();
 
         private const int NumberOfCardToMatch = 2;
-        private int currentMatchCount = 0;
-        private int turnsTaken = 0;
         private int requiredMatchesToWin;
-
         private void Start()
         {
             requiredMatchesToWin = GetRequiredMatchToWin();
             CheckForSavedGameProgressData();
             Debug.Log("RequiredMatchToWin:" + requiredMatchesToWin);
-            EventManager<Card>.AddListener(Events.CardClicked, CardClicked);
 
-            EventManager.AddListener(Events.SaveGameProgress, SaveGame);
+            EventManager<Card>.AddListener(Events.CardClicked, CardClicked);
             EventManager.AddListener(Events.RestartGame, RestartGame);
         }
 
@@ -57,15 +49,15 @@ namespace CardMatch
                 SaveGameData saveGameData = GameUtility.GetSavedGameProgressData();
                 if (saveGameData != null)
                 {
-                    turnsTaken = saveGameData.turnsTaken;
-                    currentMatchCount = saveGameData.matches;
-
-                    EventManager<int>.Dispatch(Events.MatchSuccessfull, currentMatchCount);
-                    EventManager<int>.Dispatch(Events.TurnsUpdateUI, turnsTaken);
+                    GameStats.TurnsTaken = saveGameData.turnsTaken;
+                    GameStats.CurrentMatchCount = saveGameData.matches;
+                    EventManager<int>.Dispatch(Events.MatchSuccessful, GameStats.CurrentMatchCount);
+                    EventManager<int>.Dispatch(Events.TurnsUpdateUI, GameStats.TurnsTaken);
                 }
             }
         }
 
+        private Card lastClickedCard = null;
         /// <summary>
         /// Game Logic on card click
         /// add clicked card to temp list and check both card has same id for matches
@@ -73,71 +65,49 @@ namespace CardMatch
         /// <param name="card"></param>
         private void CardClicked(ICard card)
         {
-            turnsTaken++;
-            EventManager<int>.Dispatch(Events.TurnsUpdateUI, turnsTaken);
-            if (!card.IsFlipped() && flippedCards.Count < NumberOfCardToMatch)
+            Debug.Log("Current Match Count -1 " + GameStats.CurrentMatchCount);
+            if (!card.IsFlipped())
             {
                 card.Flip();
-                flippedCards.Add(card);
-
-                if (flippedCards.Count == NumberOfCardToMatch) //NumberOfCardToMatch =2
+                GameStats.TurnsTaken++;
+                EventManager<int>.Dispatch(Events.TurnsUpdateUI, GameStats.TurnsTaken);
+                if (lastClickedCard != null)
                 {
-                    CheckForMatch();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Check the id of all flippedCards list
-        /// if ids are same then match 
-        /// </summary>
-        private void CheckForMatch()
-        {
-            bool allCardsHaveSameId = flippedCards.All(card => card.GetCardID() == flippedCards[0].GetCardID());
-
-            for (int i = 0; i < flippedCards.Count; i++)
-            {
-                if (allCardsHaveSameId)
-                {
-                    // Cards match
-                    flippedCards[i].Match();
+                    if (card.GetCardID() == lastClickedCard.GetCardID())
+                    {
+                        //match
+                        lastClickedCard.Match();
+                        card.Match();
+                        Debug.Log("Current Match Count -2 " + GameStats.CurrentMatchCount);
+                        GameStats.CurrentMatchCount++;
+                        EventManager<int>.Dispatch(Events.MatchSuccessful, GameStats.CurrentMatchCount);
+                        CheckGameWin();
+                    }
+                    else
+                    {
+                        //matchFailed
+                        lastClickedCard.MatchFailed();
+                        ((Card)card).MatchFailed();
+                        EventManager.Dispatch(Events.MatchFailed);
+                    }
+                    lastClickedCard = null;
                 }
                 else
                 {
-                    // Cards don't match
-                    flippedCards[i].Flip();
+                    lastClickedCard = (Card)card;
                 }
-            }
-
-            flippedCards.Clear();
-
-            if (allCardsHaveSameId)
-            {
-                currentMatchCount++;
-                EventManager<int>.Dispatch(Events.MatchSuccessfull, currentMatchCount);
-                AudioController.GetInstance().PlayOneShot(matchSucessClip);
-
-                CheckGameWin();
-            }
-            else
-            {
-                EventManager.Dispatch(Events.MatchFailed);
-                AudioController.GetInstance().PlayOneShot(matchFailedClip);
             }
         }
 
-
         private void CheckGameWin()
         {
-            Debug.Log("maches: " + currentMatchCount);
-            if (requiredMatchesToWin == currentMatchCount)
+            Debug.Log("maches: " + GameStats.CurrentMatchCount);
+            if (requiredMatchesToWin == GameStats.CurrentMatchCount)
             {
-                // Audio for game over
                 Debug.Log("You Won");
-                AudioController.GetInstance().PlayOneShot(gameOverClip);
-
                 //Update the UI vai event
                 EventManager.Dispatch(Events.GameWin);
+                RestartGame();
             }
         }
 
@@ -146,23 +116,7 @@ namespace CardMatch
         /// </summary>
         private void RestartGame()
         {
-            currentMatchCount = 0;
-            turnsTaken = 0;
-            PlayerPrefs.DeleteKey(GameSaver.GameDataKey);
-            PlayerPrefs.Save();
-        }
-
-        public void SetCards(Card[] cards)
-        {
-            this.cards = cards;
-            Debug.Log(this.cards.Length);
-        }
-
-        private void SaveGame()
-        {
-            GameSaver gameSaver = new GameSaver();
-            int score = FindAnyObjectByType<ScoreController>().score;
-            gameSaver.SaveCardData(cards, score, currentMatchCount, turnsTaken);
+            GameStats.ResetValues();
         }
     }
 }

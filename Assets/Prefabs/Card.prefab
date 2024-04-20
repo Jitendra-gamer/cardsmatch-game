@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardImage: {fileID: 8750955027429166767}
-  flip: {fileID: 8300000, guid: 0c1968c9a50e94bf78ff77c7b41df066, type: 3}
+  unFlipedImage: {fileID: 8750955028511895311}
 --- !u!114 &8750955028511895309
 MonoBehaviour:
   m_ObjectHideFlags: 0

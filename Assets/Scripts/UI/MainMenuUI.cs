@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CardMatch.UI
 {
@@ -15,7 +16,7 @@ namespace CardMatch.UI
         public void SelectedLayout(int layoutIndex)
         {
             // Set GameStats for user selected layout
-            GameStats.layoutType = (GameStats.LayoutType)(layoutIndex);
+            GameStats.LayoutType = (LayoutType)(layoutIndex);
             //Load GamePlay scene
             SceneLoadManager.LoadGamePlay();
         }

@@ -4,6 +4,6 @@ namespace CardMatch
     {
         UnFlipped,
         Flipped,
-        Matched
+        Matched,
     }
 }

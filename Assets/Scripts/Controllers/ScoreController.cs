@@ -8,29 +8,27 @@ namespace CardMatch
         private float comboMultiplier = 1.0f;
         private const int ScoreValue = 10;
 
-        public int score;
-
         private void Awake()
         {
-            EventManager<int>.AddListener(Events.MatchSuccessfull, ScoreUpdate);
+            EventManager<int>.AddListener(Events.MatchSuccessful, ScoreUpdate);
             EventManager.AddListener(Events.MatchFailed, MatchFailed);
             EventManager.AddListener(Events.RestartGame, RestartGame);
         }
 
         private void OnDestroy()
         {
-            EventManager<int>.RemoveListener(Events.MatchSuccessfull, ScoreUpdate);
+            EventManager<int>.RemoveListener(Events.MatchSuccessful, ScoreUpdate);
             EventManager.RemoveListener(Events.MatchFailed, MatchFailed);
             EventManager.RemoveListener(Events.RestartGame, RestartGame);
         }
 
         private void ScoreUpdate(int updatedScore)
         {
-            score = Mathf.FloorToInt(updatedScore * ScoreValue * comboMultiplier);
+            GameStats.Score = Mathf.FloorToInt(updatedScore * ScoreValue * comboMultiplier);
             //I am giving bonus for combo Matches 
             comboMultiplier += 0.5f;
             //Update UI 
-            EventManager<int>.Dispatch(Events.ScoreUpdateUI, score);
+            EventManager<int>.Dispatch(Events.ScoreUpdateUI, GameStats.Score);
         }
 
         private void MatchFailed()

@@ -1,70 +1,90 @@
 using UnityEngine;
 using System.Threading.Tasks;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace CardMatch
 {
     public class Card : MonoBehaviour, ICard
     {
-        #region Private Variables
-        [SerializeField] private Image cardImage;
-        [SerializeField] AudioClip flip;
-
+        [SerializeField] private Image cardImage, unFlipedImage;
         private bool isFlipped = false;
-        private CardType cardType;
-        #endregion
+        private CardData cardData;
 
-        #region Public Variables
-        public bool IsFlipped() => isFlipped;
-        public int GetCardID() => cardType.cardId;
-        public CardState cardState { get; private set; }
-        #endregion
+        public bool IsFlipped ()
+        {
+            return isFlipped;
+        }
+        public int GetCardID() => cardData.cardId;
 
-        #region Unity Method
-        private void Start()
+        private void OnEnable()
         {
             EventManager.AddListener(Events.GameWin, HideCard);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventManager.RemoveListener(Events.GameWin, HideCard);
         }
-        #endregion
-
-        #region Private Methods
         /// <summary>
         /// When GameOver/Win then hide the card
         /// </summary>
-        private void HideCard() => gameObject.SetActive(false);
+        private void HideCard()
+        {
+            gameObject.SetActive(false);
+        }
 
-        #endregion
-
-        #region Public Method
         /// <summary>
         /// Initialize the card required Property
         /// Show Card for few millisecond
         /// </summary>
         /// <param name="pair"></param>
-        public void Initialize(CardType pair)
+        public void Initialize(CardData cardData)
         {
-            cardType = pair;
-            isFlipped = true;
-            cardImage.sprite = pair.cardImage;
+            this.cardData = cardData;
+            cardImage.sprite = cardData.GetCardSprite();
             cardImage.enabled = true;
-            cardState = pair.cardState;
-            Debug.Log("Initialize" + cardState);
 
-            if (cardState == CardState.Matched)
+            Debug.Log("cardState: " + cardData.cardState);
+            SetCardState(cardData);
+        }
+
+        private void SetCardState(CardData cardData)
+        {
+            switch (cardData.cardState)
             {
-                cardImage.enabled = false;
-                GetComponent<Image>().enabled = false;
+                case CardState.Matched:
+                    cardImage.enabled = false;
+                    unFlipedImage.enabled = false;
+                    break;
+                case CardState.Flipped:
+                    cardImage.enabled = true;
+                    break;
+                default:
+                    if (!cardData.isSavedData)
+                    {
+                        unFlipedImage.enabled = true;
+                        ShowPreview();
+                    }
+                    else
+                    {
+                        cardImage.enabled = false;
+                    }
+
+                    break;
             }
-            else
-            {
-                GetComponent<Image>().enabled = true;
-                Flip();
-            }
+        }
+
+        private void ShowPreview()
+        {
+            StopCoroutine(nameof(FlipRoutine));
+            StartCoroutine(nameof(FlipRoutine));
+        }
+        IEnumerator FlipRoutine()
+        {
+            cardImage.enabled = true;
+            yield return new WaitForSeconds(0.5f); // todo 
+            cardImage.enabled = false;
         }
 
         /// <summary>
@@ -72,23 +92,23 @@ namespace CardMatch
         /// Show the actual image on flip
         /// Set cardState as Flipped/UnFlipped 
         /// </summary>
-        public async void Flip()
-        {
+        public void Flip()
+        {            
+            StopCoroutine(nameof(FlipRoutine));
+            Debug.Log("flip "+cardData.cardName+" "+name+" "+transform.GetSiblingIndex());
             // Todo Implement visuals or animation for matching cards
+
             isFlipped = !isFlipped;
-            if (isFlipped)
-                cardState = CardState.Flipped;
-            else
-                cardState = CardState.UnFlipped;
+            cardImage.enabled = isFlipped;//isFlipped;
+            cardData.cardState = isFlipped ? CardState.Flipped : CardState.UnFlipped;
 
-            if (!isFlipped)
-            {
-                await Task.Delay(500);
-            }
-
-            cardImage.enabled = isFlipped;
         }
-
+        public void MatchFailed()
+        {
+            isFlipped = false;
+            ShowPreview();
+        }
+        
         /// <summary>
         /// When Match the both card, disable the image and
         /// Set cardState as Matched
@@ -96,13 +116,13 @@ namespace CardMatch
         public async void Match()
         {
             Debug.Log("Card Match");
-            cardState = CardState.Matched;
+            cardData.cardState = CardState.Matched;
             //
             // Todo Implement visuals or animation for matching cards
             //
             await Task.Delay(500);
             cardImage.enabled = false;
-            GetComponent<Image>().enabled = false;
+            unFlipedImage.enabled = false;
         }
 
         /// <summary>
@@ -110,11 +130,17 @@ namespace CardMatch
         /// </summary>
         public void CardClicked()
         {
-            // Todo Implement visuals or animation for click cards
-            AudioController.GetInstance().PlayOneShot(flip);
+            EventManager.Dispatch(Events.CardClickAudio);
             EventManager<Card>.Dispatch(Events.CardClicked, this);
         }
-
-        #endregion
+        public void ResetCardFlip()
+        {
+            isFlipped = false;
+            cardData.isSavedData = false;
+        }
+        public  CardData GetCardData()
+        {
+            return cardData;
+        }
     }
 }

@@ -8,12 +8,12 @@ namespace CardMatch.UI
     {
         [SerializeField] private Button homeButton, saveButton;
         [SerializeField] private GameObject playAgianButton;
-        [SerializeField] private TMP_Text scoreText,matchesText, turnText;
+        [SerializeField] private TMP_Text scoreText, matchesText, turnText;
 
-        private void Awake()
+        private void OnEnable()
         {
             EventManager<int>.AddListener(Events.ScoreUpdateUI, ScoreUpdate);
-            EventManager<int>.AddListener(Events.MatchSuccessfull, MatchesUpdate);
+            EventManager<int>.AddListener(Events.MatchSuccessful, MatchesUpdate);
             EventManager<int>.AddListener(Events.TurnsUpdateUI, TurnsUpdate);
             EventManager.AddListener(Events.GameWin, GameOver);
 
@@ -23,10 +23,10 @@ namespace CardMatch.UI
             playAgianButton.GetComponent<Button>().onClick.AddListener(OnPlayAgain);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventManager<int>.RemoveListener(Events.ScoreUpdateUI, ScoreUpdate);
-            EventManager<int>.RemoveListener(Events.MatchSuccessfull, MatchesUpdate);
+            EventManager<int>.RemoveListener(Events.MatchSuccessful, MatchesUpdate);
             EventManager<int>.RemoveListener(Events.TurnsUpdateUI, TurnsUpdate);
             EventManager.RemoveListener(Events.GameWin, GameOver);
 
@@ -60,14 +60,13 @@ namespace CardMatch.UI
 
         private void HomeScene()
         {
-            PlayerPrefs.DeleteKey(GameSaver.GameDataKey);
-            PlayerPrefs.Save();
+            GameStats.ResetValues();
             SceneLoadManager.LoadMainMenu();
         }
 
         private void SaveGameProgress()
         {
-            EventManager.Dispatch(Events.SaveGameProgress);
+            GameUtility.SaveGame();
         }
 
         public void OnPlayAgain()
