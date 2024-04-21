@@ -8,6 +8,7 @@ namespace CardMatch.UI
     {
         [SerializeField] private Button homeButton, saveButton;
         [SerializeField] private GameObject playAgianButton;
+        [SerializeField] private PopUpController popUpController;
         [SerializeField] private TMP_Text scoreText, matchesText, turnText;
 
         private void OnEnable()
@@ -54,6 +55,7 @@ namespace CardMatch.UI
         private void GameOver()
         {
             Debug.Log("GameOver");
+            popUpController.ShowPopUp("You Won!! Play Again or Try another level");
             saveButton.gameObject.SetActive(false);
             playAgianButton.SetActive(true);
         }
@@ -66,6 +68,7 @@ namespace CardMatch.UI
 
         private void SaveGameProgress()
         {
+            popUpController.ShowPopUp("Game progress saved! Feel free to exit now. When you return, you'll pick up right where you left off, unless you clich home button or finish the game.");
             GameUtility.SaveGame();
         }
 
@@ -80,6 +83,7 @@ namespace CardMatch.UI
         {
             saveButton.gameObject.SetActive(true);
             playAgianButton.SetActive(false);
+            popUpController.HidePopUp();
             MatchesUpdate(0);
             ScoreUpdate(0);
             TurnsUpdate(0);

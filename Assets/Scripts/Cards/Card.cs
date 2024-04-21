@@ -11,6 +11,8 @@ namespace CardMatch
         private bool isFlipped = false;
         private CardData cardData;
 
+        private float delay = 0.5f;
+
         public bool IsFlipped ()
         {
             return isFlipped;
@@ -25,13 +27,6 @@ namespace CardMatch
         private void OnDisable()
         {
             EventManager.RemoveListener(Events.GameWin, HideCard);
-        }
-        /// <summary>
-        /// When GameOver/Win then hide the card
-        /// </summary>
-        private void HideCard()
-        {
-            gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -80,10 +75,11 @@ namespace CardMatch
             StopCoroutine(nameof(FlipRoutine));
             StartCoroutine(nameof(FlipRoutine));
         }
+
         IEnumerator FlipRoutine()
         {
             cardImage.enabled = true;
-            yield return new WaitForSeconds(0.5f); // todo 
+            yield return new WaitForSeconds(delay);
             cardImage.enabled = false;
         }
 
@@ -96,33 +92,52 @@ namespace CardMatch
         {            
             StopCoroutine(nameof(FlipRoutine));
             Debug.Log("flip "+cardData.cardName+" "+name+" "+transform.GetSiblingIndex());
-            // Todo Implement visuals or animation for matching cards
-
+           
             isFlipped = !isFlipped;
             cardImage.enabled = isFlipped;//isFlipped;
             cardData.cardState = isFlipped ? CardState.Flipped : CardState.UnFlipped;
-
-        }
-        public void MatchFailed()
-        {
-            isFlipped = false;
-            ShowPreview();
         }
         
         /// <summary>
         /// When Match the both card, disable the image and
         /// Set cardState as Matched
         /// </summary>
-        public async void Match()
+        public void Match()
         {
+            StopCoroutine(nameof(MatchRoutine));
+            StartCoroutine(nameof(MatchRoutine));
+
             Debug.Log("Card Match");
+        }
+
+        private IEnumerator MatchRoutine()
+        {
             cardData.cardState = CardState.Matched;
-            //
-            // Todo Implement visuals or animation for matching cards
-            //
-            await Task.Delay(500);
+            
+            yield return new WaitForSeconds(delay);
             cardImage.enabled = false;
             unFlipedImage.enabled = false;
+        }
+
+        /// <summary>
+        /// When GameOver/Win then hide the card
+        /// </summary>
+        private void HideCard()
+        {
+            StopCoroutine(nameof(HideRoutine));
+            StartCoroutine(nameof(HideRoutine));
+        }
+
+        private IEnumerator HideRoutine()
+        {
+            yield return new WaitForSeconds(delay);
+            gameObject.SetActive(false);
+        }
+
+        public void MatchFailed()
+        {
+            isFlipped = false;
+            ShowPreview();
         }
 
         /// <summary>
@@ -133,11 +148,13 @@ namespace CardMatch
             EventManager.Dispatch(Events.CardClickAudio);
             EventManager<Card>.Dispatch(Events.CardClicked, this);
         }
+
         public void ResetCardFlip()
         {
             isFlipped = false;
             cardData.isSavedData = false;
         }
+
         public  CardData GetCardData()
         {
             return cardData;
