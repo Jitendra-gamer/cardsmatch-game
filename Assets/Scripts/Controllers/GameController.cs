@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-using CardMatch.UI;
-using UnityEngine.Assertions.Must;
+using System.Collections;
 
 namespace CardMatch
 {
@@ -12,22 +10,23 @@ namespace CardMatch
 
         private const int NumberOfCardToMatch = 2;
         private int requiredMatchesToWin;
-        private void Start()
-        {
-            requiredMatchesToWin = GetRequiredMatchToWin();
-            CheckForSavedGameProgressData();
-            Debug.Log("RequiredMatchToWin:" + requiredMatchesToWin);
 
+        private void OnEnable()
+        {
             EventManager<Card>.AddListener(Events.CardClicked, CardClicked);
             EventManager.AddListener(Events.RestartGame, RestartGame);
         }
-
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventManager<Card>.RemoveListener(Events.CardClicked, CardClicked);
             EventManager.RemoveListener(Events.RestartGame, RestartGame);
         }
-
+        private void Awake()
+        {
+            requiredMatchesToWin = GetRequiredMatchToWin();
+            CheckForSavedGameProgressData();
+            Debug.Log("RequiredMatchToWin:" + requiredMatchesToWin);
+        }
         /// <summary>
         /// Get user selected Grid data
         /// Calculate requiredMatchesToWin
@@ -81,7 +80,8 @@ namespace CardMatch
                         Debug.Log("Current Match Count -2 " + GameStats.CurrentMatchCount);
                         GameStats.CurrentMatchCount++;
                         EventManager<int>.Dispatch(Events.MatchSuccessful, GameStats.CurrentMatchCount);
-                        CheckGameWin();
+                        
+                        StartCoroutine(nameof(CheckGameWin));
                     }
                     else
                     {
@@ -99,7 +99,7 @@ namespace CardMatch
             }
         }
 
-        private void CheckGameWin()
+        private IEnumerator CheckGameWin()
         {
             Debug.Log("maches: " + GameStats.CurrentMatchCount);
             if (requiredMatchesToWin == GameStats.CurrentMatchCount)
@@ -107,6 +107,7 @@ namespace CardMatch
                 Debug.Log("You Won");
                 //Update the UI vai event
                 EventManager.Dispatch(Events.GameWin);
+                yield return new WaitForSeconds(0.5f);
                 RestartGame();
             }
         }

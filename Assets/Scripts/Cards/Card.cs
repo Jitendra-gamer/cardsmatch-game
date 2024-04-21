@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -7,7 +6,12 @@ namespace CardMatch
 {
     public class Card : MonoBehaviour, ICard
     {
-        [SerializeField] private Image cardImage, unFlipedImage;
+        [SerializeField] private Button cardButton;
+        [SerializeField] private Image cardImage;
+        [SerializeField] private Sprite unFlipedSprite;
+       
+        private Sprite flipedSprite;
+      
         private bool isFlipped = false;
         private CardData cardData;
 
@@ -21,11 +25,13 @@ namespace CardMatch
 
         private void OnEnable()
         {
+            cardButton.onClick.AddListener(CardClicked);
             EventManager.AddListener(Events.GameWin, HideCard);
         }
 
         private void OnDisable()
         {
+            cardButton.onClick.RemoveListener(CardClicked);
             EventManager.RemoveListener(Events.GameWin, HideCard);
         }
 
@@ -37,7 +43,8 @@ namespace CardMatch
         public void Initialize(CardData cardData)
         {
             this.cardData = cardData;
-            cardImage.sprite = cardData.GetCardSprite();
+            flipedSprite = cardData.GetCardSprite();
+            cardImage.sprite = flipedSprite;
             cardImage.enabled = true;
 
             Debug.Log("cardState: " + cardData.cardState);
@@ -50,37 +57,21 @@ namespace CardMatch
             {
                 case CardState.Matched:
                     cardImage.enabled = false;
-                    unFlipedImage.enabled = false;
                     break;
                 case CardState.Flipped:
-                    cardImage.enabled = true;
+                    EventManager<Card>.Dispatch(Events.CardClicked, this);
                     break;
                 default:
                     if (!cardData.isSavedData)
                     {
-                        unFlipedImage.enabled = true;
-                        ShowPreview();
+                        StartCoroutine(nameof(RotateCard));
                     }
                     else
                     {
-                        cardImage.enabled = false;
+                        cardImage.sprite = unFlipedSprite;
                     }
-
                     break;
             }
-        }
-
-        private void ShowPreview()
-        {
-            StopCoroutine(nameof(FlipRoutine));
-            StartCoroutine(nameof(FlipRoutine));
-        }
-
-        IEnumerator FlipRoutine()
-        {
-            cardImage.enabled = true;
-            yield return new WaitForSeconds(delay);
-            cardImage.enabled = false;
         }
 
         /// <summary>
@@ -89,13 +80,14 @@ namespace CardMatch
         /// Set cardState as Flipped/UnFlipped 
         /// </summary>
         public void Flip()
-        {            
-            StopCoroutine(nameof(FlipRoutine));
-            Debug.Log("flip "+cardData.cardName+" "+name+" "+transform.GetSiblingIndex());
-           
+        {    
             isFlipped = !isFlipped;
-            cardImage.enabled = isFlipped;//isFlipped;
+            
+            StopCoroutine(nameof(RotateCard));
+            StartCoroutine(nameof(RotateCard));
+
             cardData.cardState = isFlipped ? CardState.Flipped : CardState.UnFlipped;
+
         }
         
         /// <summary>
@@ -104,6 +96,8 @@ namespace CardMatch
         /// </summary>
         public void Match()
         {
+            cardImage.sprite = flipedSprite;
+            cardData.cardState = CardState.Matched;
             StopCoroutine(nameof(MatchRoutine));
             StartCoroutine(nameof(MatchRoutine));
 
@@ -112,11 +106,30 @@ namespace CardMatch
 
         private IEnumerator MatchRoutine()
         {
-            cardData.cardState = CardState.Matched;
-            
             yield return new WaitForSeconds(delay);
             cardImage.enabled = false;
-            unFlipedImage.enabled = false;
+        }
+        
+        /// <summary>
+        /// Flip the card with Animation
+        /// Show the actual image on flip
+        /// Set cardState as Flipped/UnFlipped 
+        /// </summary>
+        public void MatchFailed()
+        {    
+            isFlipped = false;
+           
+            cardImage.sprite = flipedSprite;
+            StopCoroutine(nameof(MatchFailedRoutine));
+            StartCoroutine(nameof(MatchFailedRoutine));
+
+             cardData.cardState = isFlipped ? CardState.Flipped : CardState.UnFlipped;
+        }
+
+        private IEnumerator MatchFailedRoutine()
+        {
+            yield return new WaitForSeconds(delay);
+            cardImage.sprite = unFlipedSprite;
         }
 
         /// <summary>
@@ -124,6 +137,7 @@ namespace CardMatch
         /// </summary>
         private void HideCard()
         {
+            cardImage.sprite = flipedSprite;
             StopCoroutine(nameof(HideRoutine));
             StartCoroutine(nameof(HideRoutine));
         }
@@ -134,16 +148,23 @@ namespace CardMatch
             gameObject.SetActive(false);
         }
 
-        public void MatchFailed()
+        private IEnumerator RotateCard()
         {
-            isFlipped = false;
-            ShowPreview();
+            for(float i= 180f; i >= 0f; i -= 10f)
+            {
+                transform.rotation = Quaternion.Euler(0f, i, 0f);
+                if(i == 90f)
+                {
+                    cardImage.sprite = !isFlipped ? unFlipedSprite : flipedSprite;
+                }
+                yield return new WaitForSeconds(0.01f);
+            }
         }
 
         /// <summary>
         /// Send the card to GameController for matches logic 
         /// </summary>
-        public void CardClicked()
+        private void CardClicked()
         {
             EventManager.Dispatch(Events.CardClickAudio);
             EventManager<Card>.Dispatch(Events.CardClicked, this);
