@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Assets/Scripts/Controllers/GameController.cs" />
     <Compile Include="Assets/Scripts/ObjectPooling/ObjectPool.cs" />
+    <Compile Include="Assets/Scripts/Cards/CardData.cs" />
     <Compile Include="Assets/Scripts/Cards/CardTypeSO.cs" />
     <Compile Include="Assets/Scripts/Singleton/Singleton.cs" />
     <Compile Include="Assets/Scripts/GameProgress_Save/GameSaver.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="Assets/Scripts/EventManager/EventManager.cs" />
     <Compile Include="Assets/Scripts/UI/CardsGridController.cs" />
     <Compile Include="Assets/Scripts/Controllers/AudioController.cs" />
-    <Compile Include="Assets/Scripts/Cards/CardData.cs" />
+    <Compile Include="Assets/Scripts/PopUpController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
